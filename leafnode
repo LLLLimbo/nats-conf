@@ -1,0 +1,54 @@
+NATS_SERVER_NAME: "nats-edge"
+NATS_REMOTE: ["nats-leaf://192.168.3.134:7422", "nats-leaf://192.168.3.135:7422","nats-leaf://192.168.3.136:7422"]
+MQTT_USER: "seeiner-edge-mqtt"
+MQTT_PWD: "seeiner123"
+NATS_USER: "seeiner-edge"
+NATS_PWD: "seeiner123"
+NATS_ADMIN_USER: "admin"
+NATS_ADMIN_PWD: "admin"
+
+listen: 0.0.0.0:4222
+http_port: 8222
+server_name: $NATS_SERVER_NAME
+
+logtime: true
+logfile_size_limit: 100MB
+log_file: "./logs"
+
+jetstream {
+   store_dir= "./storage/nats-edge"
+}
+
+leafnodes {
+    remotes = [
+        {
+          urls: $NATS_REMOTE
+          account: SEEINER
+        },
+    ]
+}
+
+
+mqtt {
+   host: "0.0.0.0"
+   port: 1883
+}
+
+accounts: {
+   SEEINER: {
+        users: [
+            {user: $MQTT_USER, password: $MQTT_PWD, connection_types: ["MQTT"]},
+            {user: $NATS_USER, password: $NATS_PWD, connection_types: ["STANDARD"]}
+        ],
+        jetstream: enabled
+    },
+    SYS: { 
+        users: [
+            {
+               user: $NATS_ADMIN_USER,
+               password: $NATS_ADMIN_PWD
+            }
+           ]
+    },
+}
+system_account: SYS
